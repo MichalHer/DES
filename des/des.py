@@ -91,7 +91,7 @@ class DES:
     def __make_key_set(self, key:numpy.array) -> numpy.array:
         result = []
         for round in range(16):
-            result.append(numpy.array([0,1,0,0,1,0,0,1,0,1,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,1,1,0,1]))
+            result.append(self.__prepare_key(key,round))
         return numpy.array(result)
     
     def __prepare_key(self, key:numpy.array, round:int) -> numpy.array:
