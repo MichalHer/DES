@@ -3,6 +3,7 @@ from . import tables
 from .defines import CHUNK_SIZE, RANDOM_NUMBERS
 from random import randint
 from .loggers import logger
+from tqdm import tqdm
 
 class DES:
     _key: numpy.array
@@ -24,7 +25,7 @@ class DES:
         if reverse == True: keys = keys[::-1]
         logger.debug(f"zestaw podkluczy\n{keys}")
         
-        for idx, chunk in enumerate(chunks):
+        for idx, chunk in enumerate(tqdm(chunks, desc="Encryption" if reverse == False else "Decryption")):
             logger.debug(f" Rozpoczęto szyfrowanie chunka {idx} \n{chunk}")
             initial_permutation = self.__apply_permutation(chunk, tables.initial_permutation)
             logger.debug(f" Inicjacyjna permutacja chunka \n{initial_permutation}")
@@ -124,25 +125,6 @@ class DES:
         bin_result_string = bin(decimal_result).replace("0b", "").zfill(4)
         
         return numpy.array(list(bin_result_string), dtype="int")
-     
-    def __undo_sbox(self, chunk:numpy.array, sbox:numpy.array) -> numpy.array:
-        binary_string = ''.join(chunk.astype(str))
-        chunk_dec_value = int(binary_string,2)
-        row, col = self.__find_sbox_value(chunk_dec_value, sbox)
-        row_bin_string = bin(row).replace("0b", "").zfill(2)
-        col_bin_string = bin(col).replace("0b", "").zfill(4)
-        result_string = row_bin_string[0]+col_bin_string+row_bin_string[1]
-        result = numpy.array(list(result_string), dtype='int')
-        return result
-    
-    def __find_sbox_value(self, searched_value:int, sbox:numpy.array) -> tuple:
-        splitted_sbox = numpy.array_split(sbox,4)
-        for idx, sbox_val in enumerate(splitted_sbox):
-            res = numpy.where(sbox_val == searched_value)
-            if len(res[0]) != 0:
-                row = idx
-                col = res[0][0]
-                return row, col
     
     def __apply_permutation(self, chunk:numpy.array, permutation_table:numpy.array) -> numpy.array:
         returned_chunk = numpy.zeros(len(permutation_table), dtype="int")
@@ -150,12 +132,6 @@ class DES:
             returned_chunk[idx] = chunk[position]
         return returned_chunk
     
-    def __undo_permutation(self, chunk:numpy.array, permutation_table:numpy.array) -> numpy.array:
-        returned_chunk = numpy.zeros(max(permutation_table)+1, dtype="int")
-        for idx, value in enumerate(permutation_table):
-            returned_chunk[value] = chunk[idx]
-        return returned_chunk
-        
     def __create_chunks(self, message:str) -> numpy.array:
         random_numbers = (1 if RANDOM_NUMBERS == True else 0)
         text_binary = "".join(format(ord(i), '08b') for i in message)

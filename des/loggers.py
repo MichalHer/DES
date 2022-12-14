@@ -20,7 +20,7 @@ dictConfig({
     },
     'loggers': {
         'main_logger': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'handlers': ['file_handler']
         }
     },
