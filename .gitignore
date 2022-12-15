@@ -4,3 +4,6 @@
 # messages & logs
 *.txt
 *.log
+
+# keys
+*.deskey
